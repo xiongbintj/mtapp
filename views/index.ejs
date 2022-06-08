@@ -1,0 +1,121 @@
+<!-- mongsh 进入
+ show dbs(查询有几个文件)
+use myapp (进入app文件)
+db 查看当前文件名称
+show collections 查询当前文件有几个集合
+les 清理
+db.users.find()进入users用find()
+exit(quit)推出数据库exit
+ <h1>hello world!</h1>
+ -->
+<!-- <% console.log( categories) %> -->
+
+<% categories.forEach( item=> {%>
+    <!-- 解析category/:id -->
+    <a href="/category/<%=item.name%>">
+    <img src="<%= item.image %>" />
+    <h4> <%= item.name %>
+    </h4></a>
+    <% })%>
+</div>
+    <h2>全部家店</h2>
+        <div id="restaueants">
+        </div>
+        <div class="loade show" >
+            <div class="ball"></div>
+            <div class="ball"></div>
+            <div class="ball"></div>
+        </div>
+        <script>
+            let skipNum = 0
+            function getData() {
+                //ajax1
+                const http = new XMLHttpRequest()
+                http.open('POST', '/load-more', true)
+                http.onreadystatechange = function () {
+                    console.log(this);
+                    if(this.readyState === 4 && this.status === 200) {
+                        const data = JSON.parse(this.responseText)
+                        console.log(data)
+                        let html = ""
+                        for (let i = 0; i < data.length; i++) {
+                            html += `
+                            <div class="restaueant">
+                            <a href="/restaurants/${data[i]._id}">
+                            <div><img src="/img/restaurant/${data[i].image}" alt=""> </div>
+                                <h4>${data[i].name}</h4>
+                                <h4>${data[i].featured}</h4>
+                                <h4>${data[i].averageCost}</h4>
+                                <h4>${data[i].location}</h4>
+                                </a>
+                            </div>`
+                        }
+                        document.querySelector('#restaueants').innerHTML += html
+                        skipNum += 2
+                        document.querySelector('.loade').classList.remove('show')
+                    }
+                }
+                const formData = new FormData()
+                formData.append('skipNum', skipNum)
+                http.send(formData)
+            }
+            //页面加载完成时加载getData():初始化
+            window.addEventListener('load', function () {
+                getData()
+            })
+
+            //上滑到底时加载getData()
+            window.addEventListener('scroll', function () {
+                const { clientHeight, scrollTop, scrollHeight } = document.documentElement
+
+                // 滚动距离+视口高度 >=文档总高度    即代表滑动到底部
+                if (scrollTop + clientHeight + 1 >= scrollHeight) {
+                    console.log('到底了')
+                    showloader()
+                }
+            })
+            function showloader(){
+              document.querySelector('.loade').classList.add('show')
+                setTimeout(function(){
+                    getData()
+                },1200)
+            }
+        </script>
+        <style>
+            .loade{
+                width: 100px;
+                height: 10px;
+                position: fixed;
+                bottom: 50px;
+                left:50%;
+                transform: translateX(-50%);
+                background-color: yellow;
+                display: flex;
+                justify-content:space-around;
+            }
+            .show{
+                opacity:1 ;
+            }
+            .ball{
+                background-color: black;
+                border-radius: 50%;
+                width: 10px;
+                height: 10px;
+                animation: jump .5s ease-out infinite;
+                 
+            }
+            .ball:nth-child(2){
+                animation-delay:.1s ;
+            }
+            .ball:nth-child(3){
+                animation-delay:.3s ;
+            }
+            @keyframes jump {
+                0%,100%{
+                    transform: translateY(0);
+                }
+                50%{
+                    transform: translateY(-10px);
+                }
+            }
+        </style>
